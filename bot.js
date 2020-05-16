@@ -76,6 +76,11 @@ client.on('message', function(msg) {
 			}
 		}
 	}
+	
+	if (msg.content === '!TNS forceGameOver') {
+		gameEnds();
+		msg.channel.send('The game is over.')
+	}
 
 	if (msg.content === '!TNS start') {
 		if (!gameStart && players.length === maxPlayers) {
