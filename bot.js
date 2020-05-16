@@ -51,6 +51,13 @@ client.on('message', function(msg) {
 		msg.channel.send(embed);	
 	}
 
+	if (msg.content === '!TNS help') {
+		let embed = new Discord.MessageEmbed()
+			.setTitle('Available Commands')
+			.setDescription('-!TNS rule - display game rule\n-!TNS join - join a game session\n-!TNS quit - quit the current game session (only before game starts. If game starts, use forceGameOver instead)\n-!TNS start - start a game session(when 6 players joined)\n-!TNS forceGameOver - end the current game session')
+		msg.channel.send(embed);
+	}
+	
 	if (msg.content === '!TNS join') {
 		if (!gameStart) {
 			if (players.length < maxPlayers) {
