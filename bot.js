@@ -356,11 +356,11 @@ function giveCharacters(msg, players) {
 	let remainingCharacters = characters.slice(0);
 	for (let i=0; i<maxPlayers; i++) {
 		const randomNum = Math.floor(Math.random() * remainingCharacters.length);
-		identities.push(characters[randomNum]);
+		identities.push(remainingCharacters[randomNum]);
 		remainingCharacters.splice(remainingCharacters.indexOf(characters[randomNum]), 1);
 
 		const thePlayer = players[i];
-		thePlayer.send(`Your character is ${characters[randomNum]}`);
+		thePlayer.send(`Your character is ${identities[i]}`);
 	}
 }
 
