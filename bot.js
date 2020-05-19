@@ -47,8 +47,8 @@ client.on('message', function(msg) {
 			.addField('Good guys', 'Prophet, Magician, Madman, Bot')
 			.addField('Bad guys', 'Werewolf, Werewolf')
 			.addField('Win Condition', '-Good Guys win if after three nights, there is at least one good guy still alive.\n-Bad Guys wins once all good guys die')
-			.addField('Gameplay', '-The game is divided into nights and days. \n-Each night, every werewolf choose to kill a player that is still alive. The werewolves do not know each other. The prophet checks a player\'s identity (good or bad). At the end of the first night, the Magician can choose to swap the identity of any two players.\n-Each day, players take turns to speak. At any point during the day, the Madman can attack a player and reveal its identity(good or bad). If the player is indeed a werewolf, he dies. Otherwise, the Madman dies for his recklessness.')
-			.addField('Notes', '-The game won\'t end even if all werewolves have died.\n-Werewolves and Magican may choose to skip their abilities at night.\n-Bot does nothing.\n-The swap of Magician happens at the end of the first night. That is, players will only know their new identity once going into the second night.');
+			.addField('Gameplay', '-The game is divided into nights and days. \n-Each night, every werewolf choose to kill a player that is still alive. The werewolves do not know each other. However, on the first night, Werewolves aren\'t able to kill each other. The prophet checks a player\'s identity (good or bad). At the end of the first night, the Magician can choose to swap the identity of any two players.\n-Each day, players take turns to speak. At any point during the day, the Madman can attack a player and reveal its identity(good or bad). If the player is indeed a werewolf, he dies. Otherwise, the Madman dies for his recklessness. If a non-Madman tries to attack another player, he\'ll get recked and die.')
+			.addField('Notes', '-The game won\'t end even if all werewolves have died.\n-Werewolves and Magican may choose to skip their abilities at night.\n-Bot does nothing.\n-The swap of Magician happens at the end of the first night. That is, players will only know their new identity once going into the second night.\n-If the Madman gets killed by a Werewolf, the Bot will turn into a Madman.');
 		msg.channel.send(embed);	
 	}
 
@@ -149,9 +149,17 @@ client.on('message', function(msg) {
 						else {
 							killedPlayerIndex = parseInt(killedPlayerIndex[2]) - 1;
 							//alivePlayers[killedPlayerIndex] = 'dead';
-							msg.author.send(`${players[killedPlayerIndex].username} has been killed.`);
-							kill(killedPlayerIndex);
-							newDeathIndexes.push(killedPlayerIndex);
+							if (night === 1 && tempIdentities[killedPlayerIndex] === 'Werewolf') {
+								// hit the other werewolf
+								msg.author.send(`${players[killedPlayerIndex].username} is a werewolf...So he won't be killed tonight.`)
+							}
+							else {
+								msg.author.send(`${players[killedPlayerIndex].username} has been killed.`);
+								kill(killedPlayerIndex);
+								if (!newDeathIndexes.includes(killedPlayerIndex)) {
+									newDeathIndexes.push(killedPlayerIndex);
+								}
+							}
 							werewolfKilledTonight++;
 							nextDay();
 						}
@@ -222,7 +230,8 @@ client.on('message', function(msg) {
 				}
 			}
 			else {
-				playChannel.send(`Sorry, ${msg.author} you are not a madman.`);
+				playChannel.send(`Sorry, ${msg.author} you are not a madman. You got recked.`);
+				kill(players.indexOf(msg.author));
 			}
 		}
 	}
@@ -235,6 +244,14 @@ client.on('message', function(msg) {
 });
 
 function kill(index) {
+	if (identities[index] === 'Madman' && night > day) {
+		// bot turns into madman, if still alive
+		const botIndex = identities.indexOf('Bot');
+		//if (alivePlayers[botIndex] !== 'dead') {
+		identities[botIndex] = 'Madman';
+		//}
+	}
+
 	alivePlayers[index] = 'dead';
 	/*
 	if (tempIdentities[index] === 'Werewolf') {
