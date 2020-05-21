@@ -1,5 +1,8 @@
 
 const Discord = require('discord.js');
+const game = require('./game.js');
+const GameSession = game.GameSession;
+const GS = game.GameSessions;
 
 const client = new Discord.Client();
 
@@ -9,6 +12,10 @@ const characters = ['Bot', 'Madman', 'Magician', 'Prophet', 'Werewolf', 'Werewol
 const goodCharacters = ['Bot', 'Madman', 'Magician', 'Prophet'];
 const badCharacters = ['Werewolf'];
 
+//const gameSessions = [];
+//const GS = new GameSessions();
+//const gameSessions = GS.gameSessions;
+/**
 let gameStart = false;
 let players = [];
 let alivePlayers = [];
@@ -23,12 +30,98 @@ let werewolfCount = 2;
 let newDeathIndexes = [];
 
 let playChannel = undefined;
+**/
 
 client.on('ready', function() {
 	console.log('bot connected!');
 	gameStart = false;
 });
 
+client.on('message', function(msg) {
+	if (msg.content.substring(0, 4) !== '!TNS') {
+
+	}
+	else {
+		if (msg.content === '!TNS rule') {
+			let embed = new Discord.MessageEmbed()
+				.setTitle('Rules of Three Nights Survival:')
+				.addField('Good guys', 'Prophet, Magician, Madman, Bot')
+				.addField('Bad guys', 'Werewolf, Werewolf')
+				.addField('Win Condition', '-Good Guys win if after three nights, there is at least one good guy still alive.\n-Bad Guys wins once all good guys die')
+				.addField('Gameplay', '-The game is divided into nights and days. \n-Each night, every werewolf choose to kill a player that is still alive. The werewolves do not know each other. However, on the first night, Werewolves aren\'t able to kill each other. The prophet checks a player\'s identity (good or bad). At the end of the first night, the Magician can choose to swap the identity of any two players.\n-Each day, players take turns to speak. At any point during the day, the Madman can attack a player and reveal its identity(good or bad). If the player is indeed a werewolf, he dies. Otherwise, the Madman dies for his recklessness. If a non-Madman tries to attack another player, he\'ll get recked and die.')
+				.addField('Notes', '-The game won\'t end even if all werewolves have died.\n-Werewolves and Magican may choose to skip their abilities at night.\n-Bot does nothing.\n-The swap of Magician happens at the end of the first night. That is, players will only know their new identity once going into the second night.\n-If the Madman gets killed by a Werewolf, the Bot will turn into a Madman.');
+			msg.channel.send(embed);	
+		}
+
+		if (msg.content === '!TNS help') {
+			let embed = new Discord.MessageEmbed()
+				.setTitle('Available Commands')
+				.setDescription('-!TNS rule - display game rule\n-!TNS createSession - create a game session in this channel\n-!TNS join - join the open game session in this channel\n-!TNS quit - quit the current game session (only before game starts. If game starts, use forceGameOver instead)\n-!TNS start - start a game session(when 6 players joined)\n-!TNS forceGameOver - end the current game session')
+			msg.channel.send(embed);
+		}
+
+		//start a new gamesession
+		if (msg.content === '!TNS createSession' && msg.channel.type === 'text') {
+			//check if there's already a game going on in this channel
+			const channels = GS.gameSessions.map( n => n.playChannel );
+			if (!channels.includes(msg.channel)) {
+				const session = new GameSession(msg.channel);
+				//gameSessions.push(session);
+				GS.add(session);
+				msg.channel.send('A new game session has been created in this channel! Type <!TNS join> to join this session.');
+			}
+			else {
+				msg.channel.send('There seems to be already a session in this channel. Type <!TNS join> to join the session, or if it has started, wait for it to finish.')
+			}
+		}
+
+		if (msg.content === '!TNS join' && msg.channel.type === 'text') {
+			//check if the channel has a session running
+			const channels = GS.gameSessions.map( n => n.playChannel );
+			if (channels.includes(msg.channel)) {
+				//yes. check if the player is in some other session already
+				const sessionPlayers = GS.gameSessions.map( n => n.players );
+				let flag = true;
+				for (let i=0; i<sessionPlayers.length; i++) {
+					if (sessionPlayers[i].includes(msg.author)) {
+						//can join this session
+						//GS.gameSessions[i].handleMsg(msg);
+						flag = false;
+						if (GS.gameSessions[i].playChannel !== msg.channel) {
+							msg.channel.send(`${msg.author}, you cannot join two sessions at once.`);
+						}
+						break;
+					}
+				}
+				if (flag) {
+					//find the session
+					const index = channels.indexOf(msg.channel);
+					GS.gameSessions[index].handleMsg(msg);
+				}
+			}
+			else {
+				//no
+				msg.channel.send('There is currently no open game session in this channel. Type <!TNS createSession> to create one.');
+			}
+		}
+		else {
+			//see if it is a player in any game session
+			console.log(msg.content);
+			const sessionPlayers = GS.gameSessions.map( n => n.players );
+			for (let i=0; i<sessionPlayers.length; i++) {
+				if (sessionPlayers[i].includes(msg.author)) {
+					if (GS.gameSessions[i].playChannel === msg.channel || msg.channel.type === 'dm') {
+						//console.log(GS.gameSessions[i].playChannel);
+						//direct this message to that particular session
+						GS.gameSessions[i].handleMsg(msg);
+					}
+				}
+			}
+		}
+	}
+});
+
+/**
 client.on('message', function(msg) {
 	if (msg.content === '!TNS test') {
 		//console.log(msg);
@@ -253,10 +346,7 @@ function kill(index) {
 	}
 
 	alivePlayers[index] = 'dead';
-	/*
-	if (tempIdentities[index] === 'Werewolf') {
-		werewolfCount--;
-	}*/
+	
 
 	let stillGoodGuy = false;
 	for (let i=0; i<maxPlayers; i++) {
@@ -315,14 +405,7 @@ function nextDay() {
 			//prophetChecked = false;
 			playChannel.send(`Day ${day} has come. Here is what happened last night: `);
 			let flag = (newDeathIndexes.length > 0);
-			/*
-			for (let i=0; i<maxPlayers; i++) {
-				if (alivePlayers[i] === 'dead') {
-					playChannel.send(`${players[i]} died.`);
-					flag = true;
-				}
-			}
-			*/
+			
 			for (let i=0; i<newDeathIndexes.length; i++) {
 				playChannel.send(`${players[newDeathIndexes[i]]} died.`);
 			}
@@ -474,6 +557,7 @@ function nextNight(msg, n) {
 		}
 	}
 }
+**/
 
 //client.login(token);
 client.login(process.env.BOT_TOKEN);
