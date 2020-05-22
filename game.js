@@ -217,6 +217,9 @@ class GameSession{
 			if (this.identities[i] === 'Werewolf' && this.alivePlayers[i] !== 'dead') {
 				this.werewolfCount++;
 			}
+			if (this.identities[i] === 'Prophet' && this.alivePlayers[i] !== 'dead') {
+				this.prophetChecked = false;
+			}
 		}
 
 		for (let i=0; i<maxPlayers; i++) {
@@ -254,7 +257,7 @@ class GameSession{
 						}
 						break;
 					case 'Prophet':
-						this.prophetChecked = false;
+						//this.prophetChecked = false;
 						thePlayer.send('You are a prophet. You can check the identity of any player (including the dead players).');
 						let embedP = new Discord.MessageEmbed()
 								.setTitle('Players: ');
