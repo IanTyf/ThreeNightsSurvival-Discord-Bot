@@ -39,6 +39,7 @@ class GameSession{
 	}
 
 	kill(index) {
+		/*
 		if (this.identities[index] === 'Madman' && this.night > this.day) {
 			// bot turns into madman, if still alive
 			const botIndex = this.identities.indexOf('Bot');
@@ -46,7 +47,7 @@ class GameSession{
 			this.identities[botIndex] = 'Madman';
 			//}
 		}
-
+		*/
 		this.alivePlayers[index] = 'dead';
 		/*
 		if (tempIdentities[index] === 'Werewolf') {
@@ -122,6 +123,14 @@ class GameSession{
 				*/
 				for (let i=0; i<this.newDeathIndexes.length; i++) {
 					this.playChannel.send(`${this.players[this.newDeathIndexes[i]]} died.`);
+					//if the newDeath contains a madman, try to find the bot and turn him into a madman
+					if (this.identities[this.newDeathIndexes[i]] === 'Madman') {
+						const botIndex = this.identities.indexOf('Bot');
+						if (botIndex >= 0 && this.alivePlayers[botIndex] !== 'dead') {
+							this.tempIdentities[botIndex] = 'Madman';
+							this.identities[botIndex] = 'Madman';
+						}
+					}
 				}
 
 				if (!flag) {
@@ -217,6 +226,7 @@ class GameSession{
 					case 'Bot':
 						thePlayer.send('You are a Bot. You sleep.');
 						thePlayer.send('-------------------------');
+						this.nextDay();
 						break;
 					case 'Madman':
 						thePlayer.send('You are a Madman. You hate sleeping but you have to.');
@@ -240,6 +250,7 @@ class GameSession{
 						}
 						else {
 							thePlayer.send('You are a Magician. You cannot do anything tonight.');
+							this.nextDay();
 						}
 						break;
 					case 'Prophet':
