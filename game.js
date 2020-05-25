@@ -54,14 +54,16 @@ class GameSession{
 			werewolfCount--;
 		}*/
 
-		let stillGoodGuy = false;
+		//let stillGoodGuy = false;
+		let goodGuyCount = 0;
 		for (let i=0; i<maxPlayers; i++) {
 			if (goodCharacters.includes(this.identities[i]) && this.alivePlayers[i] !== 'dead') {
-				stillGoodGuy = true;
-				break;
+				//stillGoodGuy = true;
+				goodGuyCount++;
+				//break;
 			}
 		}
-		if (!stillGoodGuy) {
+		if (goodGuyCount === 0) {
 			// bad guys won
 			this.playChannel.send('Game Over. Werewolves won! All good guys have died miserably.');
 			let embed = new Discord.MessageEmbed()
@@ -75,6 +77,23 @@ class GameSession{
 			embed = embed.setDescription(listOfPlayers);
 			this.playChannel.send(embed);
 			this.gameEnds();
+		}
+		else {
+			// if only one good player alive, end the game
+			if (goodGuyCount === 1) {
+				this.playChannel.send('Game Over. Good Guys won! All werewolves have died.');
+				let embed = new Discord.MessageEmbed()
+					.setTitle('Winners: ');
+				let listOfPlayers = '';
+				for (let i=0; i<maxPlayers; i++) {
+					if (this.identities[i] !== 'Werewolf') {
+						listOfPlayers += `${i+1}. ${this.players[i].username}\n`;
+					}
+				}
+				embed = embed.setDescription(listOfPlayers);
+				this.playChannel.send(embed);
+				this.gameEnds();
+			}
 		}
 	}
 
@@ -227,7 +246,7 @@ class GameSession{
 			if (this.alivePlayers.includes(thePlayer)) {
 				switch (this.identities[i]) {
 					case 'Bot':
-						thePlayer.send('You are a Bot. You sleep.');
+						thePlayer.send('You are a Bot. You sleep. But remember, once the Madman gets killed at night, you are instantly the new Madman.');
 						thePlayer.send('-------------------------');
 						this.nextDay();
 						break;
