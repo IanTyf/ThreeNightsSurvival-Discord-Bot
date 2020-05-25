@@ -42,21 +42,26 @@ client.on('message', function(msg) {
 
 	}
 	else {
-		if (msg.content === '!TNS rule') {
+		if (msg.content === '!TNS rule' || msg.content === '!TNS rules') {
 			let embed = new Discord.MessageEmbed()
 				.setTitle('Rules of Three Nights Survival:')
 				.addField('Good guys', 'Prophet, Magician, Madman, Bot')
 				.addField('Bad guys', 'Werewolf, Werewolf')
-				.addField('Win Condition', '-Good Guys win if after three nights, there is at least one good guy still alive.\n-Bad Guys wins once all good guys die')
-				.addField('Gameplay', '-The game is divided into nights and days. \n-Each night, every werewolf choose to kill a player that is still alive. The werewolves do not know each other. However, on the first night, Werewolves aren\'t able to kill each other. The prophet checks a player\'s identity (good or bad). At the end of the first night, the Magician can choose to swap the identity of any two players.\n-Each day, players take turns to speak. At any point during the day, the Madman can attack a player and reveal its identity(good or bad). If the player is indeed a werewolf, he dies. Otherwise, the Madman dies for his recklessness. If a non-Madman tries to attack another player, he\'ll get recked and die.')
-				.addField('Notes', '-The game won\'t end even if all werewolves have died.\n-Werewolves and Magican may choose to skip their abilities at night.\n-Bot does nothing.\n-The swap of Magician happens at the end of the first night. That is, players will only know their new identity once going into the second night.\n-If the Madman gets killed by a Werewolf, the Bot will turn into a Madman.');
+				.addField('Win Condition', '-Good Guys win if after three nights, there is at least one good guy still alive.\n-Bad Guys win once all good guys die')
+				.addField('Characters', '<Werewolf> - Each night, a Werewolf can choose to kill a player. Werewolves do not know each other. If Werewolf A hits Werewolf B during the first night, Werewolf B will not die and Werewolf A will get notified. This does not hold true for the second and third night.\n'+
+					'<Prophet> - Each night, a Prophet can check one player\'s identity (good or bad).\n' + 
+					'<Magician> - A Magician can swap the identities of two players at the end of the first night. This ability does not carry over to the following nights.\n' +
+					'<Madman> - A Madman can attack a player at any point during the day. If the target is a Werewolf, the target dies. If the target is a good guy, target will live but the Madman dies for his recklessness.\n' +
+					'<Bot> - A Bot cannot do anything. However, if the Madman gets killed at night, the Bot will immediately turns into a Madman.')
+				.addField('Gameplay', '-The game is divided into 3 nights and 2 days. Each night, every player sees his/her own character. Characters with special abilities choose their actions. When everyone makes their decisions, the next day arrives. Each day, players who just died in the previous night first share some final words. Then, a random player will be asked to start talking. Once a player finishes talking, he/she should say \'pass\' out loud and the next player in numerical order should start talking. The last player who talks should type <!TNS night> in the channel to finish the day. Game ends after three nights are gone.')
+				.addField('Notes', '-Players may only talk during their own turn. Reacting/Responding to other players when they\'re talking is not allowed.\nThe game won\'t end immediately even if all Werewolves have died.\n-Werewolves and Magican may choose to skip their abilities at night.\n-If the Madman gets killed by a Werewolf, the Bot will turn into a Madman immediately.\n-Bot does not become Madman if Madman dies because of attacking a good guy.\n-The swap of Magician happens at the end of the first night. That is, players will only know their new identity once going into the second night. Also, Prophet checks the identities before the swap happens.\nDead players will receive everyone\'s identity at night. Please keep your mouth shut.');
 			msg.channel.send(embed);	
 		}
 
 		if (msg.content === '!TNS help') {
 			let embed = new Discord.MessageEmbed()
 				.setTitle('Available Commands')
-				.setDescription('-!TNS rule - display game rule\n-!TNS createSession - create a game session in this channel\n-!TNS join - join the open game session in this channel\n-!TNS quit - quit the current game session (only before game starts. If game starts, use forceGameOver instead)\n-!TNS start - start a game session(when 6 players joined)\n-!TNS forceGameOver - end the current game session')
+				.setDescription('-!TNS rules - display game rules\n-!TNS createSession - create a game session in this channel\n-!TNS join - join the open game session in this channel\n-!TNS quit - quit the current game session (only before game starts. If game starts, use forceGameOver instead)\n-!TNS start - start a game session(when 6 players joined)\n-!TNS forceGameOver - end the current game session')
 			msg.channel.send(embed);
 		}
 
