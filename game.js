@@ -56,11 +56,15 @@ class GameSession{
 
 		//let stillGoodGuy = false;
 		let goodGuyCount = 0;
+		let badGuyCount = 0;
 		for (let i=0; i<maxPlayers; i++) {
-			if (goodCharacters.includes(this.identities[i]) && this.alivePlayers[i] !== 'dead') {
-				//stillGoodGuy = true;
-				goodGuyCount++;
-				//break;
+			if (this.alivePlayers[i] !== 'dead') {
+				if (goodCharacters.includes(this.identities[i])) {
+					goodGuyCount++;
+				}
+				else if (badCharacters.includes(this.identities[i])) {
+					badGuyCount++;
+				}
 			}
 		}
 		if (goodGuyCount === 0) {
@@ -80,7 +84,7 @@ class GameSession{
 		}
 		else {
 			// if only one good player alive, end the game
-			if (goodGuyCount === 1) {
+			if (goodGuyCount === 1 && badGuyCount === 0) {
 				this.playChannel.send('Game Over. Good Guys won! All werewolves have died.');
 				let embed = new Discord.MessageEmbed()
 					.setTitle('Winners: ');
